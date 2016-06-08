@@ -2,9 +2,9 @@
   "name": "speedy-quiz",
   "version": "0.1.0",
   "description": "A quick quiz game",
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/weeix/speedy-quiz.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/weeix/speedy-quiz.git"
   },
   "bugs": {
     "url": "https://github.com/weeix/speedy-quiz/issues"
@@ -16,7 +16,10 @@
   "author": "Wee Sritippho",
   "license": "MIT",
   "dependencies": {
+    "body-parser": "^1.15.1",
     "express": "^4.13.4",
+    "express-jwt": "^3.4.0",
+    "jsonwebtoken": "^7.0.0",
     "sqlite3": "^3.1.4"
   }
 }
