@@ -105,7 +105,7 @@ db.serialize(function() {
   // Fill Users Table
   var stmt = db.prepare("INSERT INTO users (uid, gid, username, password, displayName, role) VALUES (?, ?, ?, ?, ?, ?)");
   stmt.run(1, null, "admin", "Qz654321", "ผู้ดูแลระบบ", 0);
-  stmt.run(2, 1, "g1", "Qz123456", "กลุ่ม 1", 0);
+  stmt.run(2, 1, "g1", "Qz123456", "กลุ่ม 1", 1);
   stmt.run(3, 1, "g2", "Qz123456", "กลุ่ม 2", 1);
   stmt.run(4, 1, "g3", "Qz123456", "กลุ่ม 3", 1);
   stmt.run(5, 1, "g4", "Qz123456", "กลุ่ม 4", 1);
