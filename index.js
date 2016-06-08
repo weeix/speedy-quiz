@@ -26,7 +26,7 @@ app.post('/authenticate', function (req, res) {
       }
       return;
     }
-    var token = jwt.sign(data, secret, { expiresInMinutes: 5 });
+    var token = jwt.sign(data, secret, { expiresIn: "5m" });
     res.json({ token: token });
   });
 });
