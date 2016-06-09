@@ -9,7 +9,6 @@ var secret = 'AZ6Chvpihim6D25/7nMXcZsFy8HykfuEPMsslU2b8mw=';
 
 var app = express();
 
-app.use('/api', expressJwt({secret: secret}));
 app.use(bodyParser.json());
 app.use(function(err, req, res, next){
   if (err.constructor.name === 'UnauthorizedError') {
@@ -17,12 +16,15 @@ app.use(function(err, req, res, next){
   }
 });
 
+app.use('/api', expressJwt({secret: secret}));
+app.use('/api/v1', require('./api')());
+
 app.post('/authenticate', function (req, res) {
-  user.login(req.body.username, req.body.password, function(error, data) {
-    if (error) {
-      if (error.message == "InvalidCredentials") {
+  user.login(req.body.username, req.body.password, function(err, data) {
+    if (err) {
+      if (err.name === 'InvalidCredentialsError') {
         //if is invalid, return 401
-        res.status(401).send('Invalid username/password');
+        res.status(401).send(err.message);
       }
       return;
     }
