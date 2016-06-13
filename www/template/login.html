@@ -1,0 +1,8 @@
+<div class="login">
+    <form class="pure-form pure-form-stacked" ng-submit="submit()">
+        <input class="pure-input-1" ng-model="user.username" type="text" name="username" placeholder="Username" />
+        <input class="pure-input-1" ng-model="user.password" type="password" name="password" placeholder="Password" />
+        <input type="submit" class="pure-button pure-button-primary pure-input-1" value="Login" />
+    </form>
+    <div ng-show="error" class="error">{{error}}</div>
+</div>

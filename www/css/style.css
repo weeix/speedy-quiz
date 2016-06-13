@@ -1,3 +1,12 @@
-.main-content {
-  padding: 5% 1em 0;
+.login {
+  padding-top: 5%;
+  margin: 0 auto;
+  max-width: 360px;
+}
+
+.error {
+  padding: 1em;
+  background-color: red;
+  color: white;
+  margin: 1em 0;
 }
