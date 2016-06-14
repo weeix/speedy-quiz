@@ -1,65 +1,83 @@
 var app = angular.module('app', ['components', 'ngRoute']);
 
-app.controller('MainController', function($scope, $window, b64) {
-  $scope.userState = {
-    isAuthenticated: false,
-    welcome: '',
-    message: ''
-  };
-  if ($window.sessionStorage.token) {
-    $scope.userState.isAuthenticated = true;
-    var encodedProfile = $window.sessionStorage.token.split('.')[1];
-    var profile = JSON.parse(b64.decode(encodedProfile));
-    $scope.userState.welcome = 'Welcome ' + profile.displayName;
-  }
-});
+app.controller('MainController', ['$scope', 'UserAuth', function ($scope, UserAuth) {
+  $scope.userState = UserAuth.state;
+  UserAuth.setAuth();
+}]);
 
-app.controller('LoginController', function($scope, $http, $window, $location, b64) {
-  $scope.submit = function() {
-    $http
-      .post('/authenticate', $scope.user)
-      .success(function (data, status, headers, config) {
-        $window.sessionStorage.token = data.token;
-        $scope.userState.isAuthenticated = true;
-        var encodedProfile = $window.sessionStorage.token.split('.')[1];
-        var profile = JSON.parse(b64.decode(encodedProfile));
-        $scope.userState.welcome = 'Welcome ' + profile.displayName;
+app.controller('LoginController', ['$scope', '$location', 'UserAuth', function ($scope, $location, UserAuth) {
+  $scope.submit = function (user) {
+    UserAuth.login(user, function (err) {
+      $scope.userState = UserAuth.state;
+      if (err) {
+        $scope.error = err.message;
+      } else {
         $location.url('/about');
-      })
-      .error(function (data, status, headers, config) {
-        // Erase the token if the user fails to log in
-        delete $window.sessionStorage.token;
-        $scope.userState.isAuthenticated = false;
-
-        // Handle login errors here
-        $scope.error = 'Error: Invalid user or password';
-        $scope.userState.welcome = '';
-      });
+      }
+    });
   };
-});
+}]);
 
-app.factory('b64', function () {
-  return {
-    encode: (str) => {
-    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
-        return String.fromCharCode('0x' + p1);
+app.factory('UserAuth', ['$http', '$window', function ($http, $window) {
+  var encode = function (str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+      return String.fromCharCode('0x' + p1);
     }));
-    },
-    decode: (str) => {
-    return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  };
+  var decode = function (str) {
+    return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
+  };
+  return {
+    state: {
+      isAuthenticated: false,
+      welcome: '',
+      message: ''
+    },
+    setAuth: function () {
+      if ($window.sessionStorage.token) {
+        this.state.isAuthenticated = true;
+        var encodedProfile = $window.sessionStorage.token.split('.')[1];
+        var profile = JSON.parse(decode(encodedProfile));
+        this.state.welcome = 'Welcome ' + profile.displayName;
+      }
+    },
+    login: function (user, callback) {
+      var self = this;
+      if (user == null || user.username == null || user.password == null) {
+        var err = new Error("Error: Username/password is null");
+        callback(err);
+        return;
+      } else {
+        $http
+          .post('/authenticate', user)
+          .success(function (data, status, headers, config) {
+            $window.sessionStorage.token = data.token;
+            self.setAuth();
+            callback(null);
+            return;
+          })
+          .error(function (data, status, headers, config) {
+            // Erase the token if the user fails to log in
+            delete $window.sessionStorage.token;
+            self.state.isAuthenticated = false;
+
+            // Handle login errors here
+            self.state.welcome = '';
+            var err = new Error('Error: Invalid username or password');
+            callback(err);
+            return;
+          });
+      }
     }
   };
-})
+}]);
 
-app.config(function($routeProvider) {
+app.config(['$routeProvider', function ($routeProvider) {
   $routeProvider.
     when('/', {
-      templateUrl: 'template/test.html',
-      controller: function($scope) {
-        $scope.linkText = 'about';
-      }
+      templateUrl: 'template/test.html'
     }).
     when('/login', {
       templateUrl: 'template/login.html',
@@ -68,4 +86,4 @@ app.config(function($routeProvider) {
     when('/about', {
       templateUrl: 'template/test2.html'
     });
-});
+}]);
