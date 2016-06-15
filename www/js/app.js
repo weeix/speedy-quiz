@@ -18,7 +18,7 @@ app.controller('LoginCtrl', ['$scope', '$location', 'UserAuth', function ($scope
   };
 }]);
 
-app.factory('UserAuth', ['$http', '$window', function ($http, $window) {
+app.factory('UserAuth', ['$http', '$window', '$q', function ($http, $window, $q) {
   var encode = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
       return String.fromCharCode('0x' + p1);
@@ -36,12 +36,17 @@ app.factory('UserAuth', ['$http', '$window', function ($http, $window) {
       message: ''
     },
     setAuth: function () {
+      var deferred = $q.defer();
       if ($window.sessionStorage.token) {
         this.state.isAuthenticated = true;
         var encodedProfile = $window.sessionStorage.token.split('.')[1];
         var profile = JSON.parse(decode(encodedProfile));
         this.state.welcome = 'Welcome ' + profile.displayName;
+        deferred.resolve();
+      } else {
+        deferred.reject();
       }
+      return deferred.promise;
     },
     login: function (user, callback) {
       var self = this;
@@ -59,22 +64,43 @@ app.factory('UserAuth', ['$http', '$window', function ($http, $window) {
             return;
           })
           .error(function (data, status, headers, config) {
-            // Erase the token if the user fails to log in
-            delete $window.sessionStorage.token;
-            self.state.isAuthenticated = false;
-
             // Handle login errors here
-            self.state.welcome = '';
+            self.logout();
             var err = new Error('Error: Invalid username or password');
             callback(err);
             return;
           });
       }
+    },
+    logout: function () {
+      this.state.welcome = '';
+      this.state.message = '';
+      this.state.isAuthenticated = false;
+      delete $window.sessionStorage.token;
     }
   };
 }]);
 
-app.config(['$routeProvider', function ($routeProvider) {
+app.factory('authInterceptor', ['$rootScope', '$q', '$window', function ($rootScope, $q, $window) {
+  return {
+    request: function (config) {
+      config.headers = config.headers || {};
+      if ($window.sessionStorage.token) {
+        config.headers.Authorization = 'Bearer ' + $window.sessionStorage.token;
+      }
+      return config;
+    },
+    responseError: function (rejection) {
+      if (rejection.status === 401) {
+        // handle the case where the user is not authenticated
+        delete $window.sessionStorage.token;
+      }
+      return $q.reject(rejection);
+    }
+  };
+}]);
+
+app.config(['$routeProvider', '$httpProvider', function ($routeProvider, $httpProvider) {
   $routeProvider.
     when('/', {
       templateUrl: 'template/test.html'
@@ -86,4 +112,5 @@ app.config(['$routeProvider', function ($routeProvider) {
     when('/about', {
       templateUrl: 'template/test2.html'
     });
+  $httpProvider.interceptors.push('authInterceptor');
 }]);
