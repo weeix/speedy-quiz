@@ -2,7 +2,7 @@ var app = angular.module('components', []);
 
 app.directive('mainContent', function() {
   return {
-    controller: 'MainController',
+    controller: 'MainCtrl',
     templateUrl: 'template/main.html'
   }
 });

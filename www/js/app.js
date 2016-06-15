@@ -1,11 +1,11 @@
 var app = angular.module('app', ['components', 'ngRoute']);
 
-app.controller('MainController', ['$scope', 'UserAuth', function ($scope, UserAuth) {
+app.controller('MainCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
   $scope.userState = UserAuth.state;
   UserAuth.setAuth();
 }]);
 
-app.controller('LoginController', ['$scope', '$location', 'UserAuth', function ($scope, $location, UserAuth) {
+app.controller('LoginCtrl', ['$scope', '$location', 'UserAuth', function ($scope, $location, UserAuth) {
   $scope.submit = function (user) {
     UserAuth.login(user, function (err) {
       $scope.userState = UserAuth.state;
@@ -81,7 +81,7 @@ app.config(['$routeProvider', function ($routeProvider) {
     }).
     when('/login', {
       templateUrl: 'template/login.html',
-      controller: 'LoginController'
+      controller: 'LoginCtrl'
     }).
     when('/about', {
       templateUrl: 'template/test2.html'
