@@ -116,6 +116,7 @@ app.factory('authInterceptor', ['$rootScope', '$q', '$window', function ($rootSc
       if (rejection.status === 401) {
         // handle the case where the user is not authenticated
         delete $window.sessionStorage.token;
+        $window.location.href = "/login";
       }
       return $q.reject(rejection);
     }
