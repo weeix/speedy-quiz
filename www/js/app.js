@@ -12,26 +12,30 @@ app.controller('MainCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
 }]);
 
 app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
+  $scope.userState = UserAuth.state;
   $scope.submit = function (user) {
-    UserAuth.login(user, function (err) {
-      $scope.userState = UserAuth.state;
-      if (err) {
-        $scope.error = err.message;
-      } else {
+    UserAuth.login(user)
+      .then(function () {
         UserAuth.redirect();
-      }
-    });
-  };
+      }, function(err) {
+        $scope.error = err;
+      });
+    };
 }]);
 
-app.controller('AdminCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
+app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
   $scope.logout = function () {
     UserAuth.logout();
     UserAuth.redirect();
   };
+  $http
+    .get('/api/v1/group')
+    .then(function (response) {
+      $scope.groups = response.data;
+    })
 }]);
 
-app.factory('UserAuth', ['$http', '$window', '$location', '$q', function ($http, $window, $location, $q) {
+app.factory('UserAuth', ['$http', '$window', '$location', '$timeout', '$q', function ($http, $window, $location, $timeout, $q) {
   var encode = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
       return String.fromCharCode('0x' + p1);
@@ -63,26 +67,25 @@ app.factory('UserAuth', ['$http', '$window', '$location', '$q', function ($http,
       }
       return deferred.promise;
     },
-    login: function (user, callback) {
+    login: function (user) {
+      var deferred = $q.defer();
       var self = this;
       if (user == null || user.username == null || user.password == null) {
-        var err = new Error("Error: Username/password is null");
-        callback(err);
-        return;
+        deferred.reject('Error: Username/password is null');
       } else {
         $http
           .post('/authenticate', user)
           .then(function (response) {
             $window.sessionStorage.token = response.data.token;
             self.setAuth();
-            callback(null);
+            deferred.resolve();
           }, function (response) {
             // Handle login errors here
             self.logout();
-            var err = new Error('Error: Invalid username or password');
-            callback(err);
+            deferred.reject('Error: Invalid username or password');
           });
       }
+      return deferred.promise;
     },
     logout: function () {
       this.state.welcome = '';
@@ -103,7 +106,7 @@ app.factory('UserAuth', ['$http', '$window', '$location', '$q', function ($http,
   };
 }]);
 
-app.factory('authInterceptor', ['$rootScope', '$q', '$window', function ($rootScope, $q, $window) {
+app.factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function ($rootScope, $q, $window, $location) {
   return {
     request: function (config) {
       config.headers = config.headers || {};
@@ -116,7 +119,7 @@ app.factory('authInterceptor', ['$rootScope', '$q', '$window', function ($rootSc
       if (rejection.status === 401) {
         // handle the case where the user is not authenticated
         delete $window.sessionStorage.token;
-        $window.location.href = "/login";
+        $location.path = "/login";
       }
       return $q.reject(rejection);
     }
