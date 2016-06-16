@@ -119,7 +119,7 @@ app.factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', func
       if (rejection.status === 401) {
         // handle the case where the user is not authenticated
         delete $window.sessionStorage.token;
-        $location.path = "/login";
+        $location.path('/login');
       }
       return $q.reject(rejection);
     }
