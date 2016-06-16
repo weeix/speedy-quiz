@@ -32,7 +32,7 @@ app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $h
     .get('/api/v1/group')
     .then(function (response) {
       $scope.groups = response.data;
-    })
+    });
 }]);
 
 app.factory('UserAuth', ['$http', '$window', '$location', '$timeout', '$q', function ($http, $window, $location, $timeout, $q) {

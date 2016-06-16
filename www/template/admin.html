@@ -5,7 +5,7 @@
             <option ng-repeat="collection in collections">{{collection.displayName}}</option>
         </select>
         <select class="pure-input-1" name="groups">
-            <obtion ng-repeat="group in groups">{{group.displayName}}</obtion>
+            <option ng-repeat="group in groups" value="{{group.gid}}">{{group.displayName}}</option>
         </select>
         <input type="submit"  class="pure-button pure-button-primary pure-input-1"  value="Start Quiz" />
     </form>
