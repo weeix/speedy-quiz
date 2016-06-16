@@ -1,11 +1,11 @@
 .login {
-  padding-top: 5%;
+  padding: 5% 1em 1em;
   margin: 0 auto;
   max-width: 360px;
 }
 
 .admin {
-  padding-top: 5%;
+  padding: 5% 1em 1em;
   margin: 0 auto;
   max-width: 360px;
 }
