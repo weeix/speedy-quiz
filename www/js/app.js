@@ -1,24 +1,37 @@
 var app = angular.module('app', ['components', 'ngRoute']);
 
 app.controller('MainCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
-  $scope.userState = UserAuth.state;
-  UserAuth.setAuth();
+  $scope.$on('$locationChangeStart', function(event, newUrl) {
+    UserAuth.redirect();
+  });
+  UserAuth.setAuth()
+    .finally(function() {
+      $scope.userState = UserAuth.state;
+      UserAuth.redirect();
+    });
 }]);
 
-app.controller('LoginCtrl', ['$scope', '$location', 'UserAuth', function ($scope, $location, UserAuth) {
+app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
   $scope.submit = function (user) {
     UserAuth.login(user, function (err) {
       $scope.userState = UserAuth.state;
       if (err) {
         $scope.error = err.message;
       } else {
-        $location.url('/about');
+        UserAuth.redirect();
       }
     });
   };
 }]);
 
-app.factory('UserAuth', ['$http', '$window', '$q', function ($http, $window, $q) {
+app.controller('AdminCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
+  $scope.logout = function () {
+    UserAuth.logout();
+    UserAuth.redirect();
+  };
+}]);
+
+app.factory('UserAuth', ['$http', '$window', '$location', '$q', function ($http, $window, $location, $q) {
   var encode = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
       return String.fromCharCode('0x' + p1);
@@ -33,7 +46,8 @@ app.factory('UserAuth', ['$http', '$window', '$q', function ($http, $window, $q)
     state: {
       isAuthenticated: false,
       welcome: '',
-      message: ''
+      message: '',
+      role: undefined
     },
     setAuth: function () {
       var deferred = $q.defer();
@@ -42,6 +56,7 @@ app.factory('UserAuth', ['$http', '$window', '$q', function ($http, $window, $q)
         var encodedProfile = $window.sessionStorage.token.split('.')[1];
         var profile = JSON.parse(decode(encodedProfile));
         this.state.welcome = 'Welcome ' + profile.displayName;
+        this.state.role = profile.role;
         deferred.resolve();
       } else {
         deferred.reject();
@@ -57,18 +72,15 @@ app.factory('UserAuth', ['$http', '$window', '$q', function ($http, $window, $q)
       } else {
         $http
           .post('/authenticate', user)
-          .success(function (data, status, headers, config) {
-            $window.sessionStorage.token = data.token;
+          .then(function (response) {
+            $window.sessionStorage.token = response.data.token;
             self.setAuth();
             callback(null);
-            return;
-          })
-          .error(function (data, status, headers, config) {
+          }, function (response) {
             // Handle login errors here
             self.logout();
             var err = new Error('Error: Invalid username or password');
             callback(err);
-            return;
           });
       }
     },
@@ -76,7 +88,17 @@ app.factory('UserAuth', ['$http', '$window', '$q', function ($http, $window, $q)
       this.state.welcome = '';
       this.state.message = '';
       this.state.isAuthenticated = false;
+      this.state.role = undefined;
       delete $window.sessionStorage.token;
+    },
+    redirect: function () {
+      if (this.state.role === 0) {
+        $location.path('/admin');
+      } else if (this.state.role === 1) {
+        $location.path('/about');
+      } else {
+        $location.path('/login');
+      }
     }
   };
 }]);
@@ -111,6 +133,10 @@ app.config(['$routeProvider', '$httpProvider', function ($routeProvider, $httpPr
     }).
     when('/about', {
       templateUrl: 'template/test2.html'
+    }).
+    when('/admin', {
+      templateUrl: 'template/admin.html',
+      controller: 'AdminCtrl'
     });
   $httpProvider.interceptors.push('authInterceptor');
 }]);

@@ -4,6 +4,12 @@
   max-width: 360px;
 }
 
+.admin {
+  padding-top: 5%;
+  margin: 0 auto;
+  max-width: 360px;
+}
+
 .error {
   padding: 1em;
   background-color: red;
