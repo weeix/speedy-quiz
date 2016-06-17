@@ -27,3 +27,8 @@
   color: white;
   margin: 1em 0;
 }
+
+/* Override purecss */
+.pure-form select {
+    height: 2.5em;
+}
