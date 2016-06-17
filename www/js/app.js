@@ -7,7 +7,6 @@ app.controller('MainCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
   UserAuth.setAuth()
     .finally(function() {
       $scope.userState = UserAuth.state;
-      UserAuth.redirect();
     });
 }]);
 
@@ -106,7 +105,7 @@ app.factory('UserAuth', ['$http', '$window', '$location', '$timeout', '$q', func
   };
 }]);
 
-app.factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', function ($rootScope, $q, $window, $location) {
+app.factory('authInterceptor', ['$rootScope', '$q', '$window', '$injector', function ($rootScope, $q, $window, $injector) {
   return {
     request: function (config) {
       config.headers = config.headers || {};
@@ -118,8 +117,9 @@ app.factory('authInterceptor', ['$rootScope', '$q', '$window', '$location', func
     responseError: function (rejection) {
       if (rejection.status === 401) {
         // handle the case where the user is not authenticated
-        delete $window.sessionStorage.token;
-        $location.path('/login');
+        var UserAuth = $injector.get('UserAuth');
+        UserAuth.logout();
+        UserAuth.redirect();
       }
       return $q.reject(rejection);
     }
