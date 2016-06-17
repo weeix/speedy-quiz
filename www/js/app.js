@@ -28,6 +28,11 @@ app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $h
     UserAuth.redirect();
   };
   $http
+    .get('/api/v1/collection')
+    .then(function (response) {
+      $scope.collections = response.data;
+    });
+  $http
     .get('/api/v1/group')
     .then(function (response) {
       $scope.groups = response.data;

@@ -1,10 +1,10 @@
 <div class="admin">
     <h1>Setup Quiz</h1>
     <form  class="pure-form pure-form-stacked" ng-submit="submit(user)">
-        <select class="pure-input-1" name="collections">
-            <option ng-repeat="collection in collections">{{collection.displayName}}</option>
+        <select class="pure-input-1" name="collections" ng-model="selected.collection">
+            <option ng-repeat="collection in collections" value="{{collection.cid}}">{{collection.collectionName}}</option>
         </select>
-        <select class="pure-input-1" name="groups">
+        <select class="pure-input-1" name="groups" ng-model="selected.group">
             <option ng-repeat="group in groups" value="{{group.gid}}">{{group.displayName}}</option>
         </select>
         <input type="submit"  class="pure-button pure-button-primary pure-input-1"  value="Start Quiz" />
