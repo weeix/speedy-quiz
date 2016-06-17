@@ -58,6 +58,31 @@ module.exports = function () {
     });
   });
 
+  api.get('/quiz/:qzid', function (req, res) {
+    adminCheck(req, function (err) {
+      var unasked = false;
+      if (err) {
+        res.status(401).send(err.message);
+        return;
+      }
+      if (req.query.unasked != null) {
+        unasked = true;
+      }
+      if (req.params.qzid) {
+        quiz.show(req.params.qzid, unasked, function (err, rows) {
+          if (err) {
+            res.status(404).send(err.message);
+            return;
+          }
+          res.json(rows);
+        });
+      } else {
+        res.status(400).send('No quiz ID specified');
+        return;
+      }
+    });
+  })
+
   return api;
 }
 

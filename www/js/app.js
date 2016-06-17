@@ -23,6 +23,14 @@ app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
 }]);
 
 app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
+  $scope.$on('quizStarted', function (event, quizID) {
+    $http
+      .get('/api/v1/quiz/' + quizID.toString() + '?unasked')
+      .then(function (response) {
+        $scope.quizID = quizID;
+        $scope.questionIDs = response.data;
+      });
+  });
   $scope.selected = {
     cid: undefined,
     gid: undefined
@@ -31,7 +39,7 @@ app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $h
     $http
       .post('/api/v1/quiz', pair)
       .then(function (response) {
-        $scope.quizID = response.data.lastID;
+        $scope.$emit('quizStarted', response.data.lastID);
       });
   }
   $scope.logout = function () {

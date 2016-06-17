@@ -29,3 +29,27 @@ module.exports.add = (gid, cid, callback) => {
     callback(null, result);
   });
 };
+
+module.exports.show = (qzid, unasked, callback) => {
+  if (unasked == true) {
+    db.all("SELECT questions_collections.qid FROM quizzes LEFT JOIN questions_collections ON quizzes.cid = questions_collections.cid LEFT JOIN quiz_sessions ON questions_collections.qid = quiz_sessions.qid WHERE quizzes.qzid = ? AND quiz_sessions.start_time IS NULL", qzid, function (err, rows) {
+      returnQuestions(err, rows, callback);
+    });
+  } else {
+    db.all("SELECT questions_collections.qid FROM quizzes LEFT JOIN questions_collections ON quizzes.cid = questions_collections.cid WHERE quizzes.qzid = ?", qzid, function (err, rows) {
+      returnQuestions(err, rows, callback);
+    });
+  }
+  function returnQuestions(err, rows, callback) {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    if (!rows.length) {
+      err = new Error('No questions');
+      callback(err, null);
+      return;
+    }
+    callback(null, rows);
+  }
+}
