@@ -1,13 +1,16 @@
-<div class="admin">
+<div class="admin" ng-show="!quizID">
     <h1>Setup Quiz</h1>
-    <form  class="pure-form pure-form-stacked" ng-submit="submit(user)">
-        <select class="pure-input-1" name="collections" ng-model="selected.collection">
+    <form  class="pure-form pure-form-stacked" ng-submit="startQuiz(selected)">
+        <select class="pure-input-1" name="collections" ng-model="selected.cid">
             <option ng-repeat="collection in collections" value="{{collection.cid}}">{{collection.collectionName}}</option>
         </select>
-        <select class="pure-input-1" name="groups" ng-model="selected.group">
+        <select class="pure-input-1" name="groups" ng-model="selected.gid">
             <option ng-repeat="group in groups" value="{{group.gid}}">{{group.displayName}}</option>
         </select>
-        <input type="submit"  class="pure-button pure-button-primary pure-input-1"  value="Start Quiz" />
+        <input type="submit" class="pure-button pure-button-primary pure-input-1"  value="Start Quiz" />
     </form>
-    <p class="logout"><a href="" ng-click="logout()">Logout</a></p>
 </div>
+<div class="admin-quiz" ng-show="quizID">
+    <h1>Quiz ID: {{quizID}}</h1>
+</div>
+<div class="logout"><a href="" ng-click="logout()">Logout</a></div>

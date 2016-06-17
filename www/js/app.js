@@ -24,8 +24,15 @@ app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
 
 app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
   $scope.selected = {
-    collection: undefined,
-    group: undefined
+    cid: undefined,
+    gid: undefined
+  };
+  $scope.startQuiz = function (pair) {
+    $http
+      .post('/api/v1/quiz', pair)
+      .then(function (response) {
+        $scope.quizID = response.data.lastID;
+      });
   }
   $scope.logout = function () {
     UserAuth.logout();
@@ -35,13 +42,13 @@ app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $h
     .get('/api/v1/collection')
     .then(function (response) {
       $scope.collections = response.data;
-      $scope.selected.collection = response.data[0].cid.toString();
+      $scope.selected.cid = response.data[0].cid.toString();
     });
   $http
     .get('/api/v1/group')
     .then(function (response) {
       $scope.groups = response.data;
-      $scope.selected.group = response.data[0].gid.toString();
+      $scope.selected.gid = response.data[0].gid.toString();
     });
 }]);
 
