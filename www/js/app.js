@@ -23,6 +23,10 @@ app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
 }]);
 
 app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
+  $scope.selected = {
+    collection: undefined,
+    group: undefined
+  }
   $scope.logout = function () {
     UserAuth.logout();
     UserAuth.redirect();
@@ -31,11 +35,13 @@ app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $h
     .get('/api/v1/collection')
     .then(function (response) {
       $scope.collections = response.data;
+      $scope.selected.collection = response.data[0].cid.toString();
     });
   $http
     .get('/api/v1/group')
     .then(function (response) {
       $scope.groups = response.data;
+      $scope.selected.group = response.data[0].gid.toString();
     });
 }]);
 
