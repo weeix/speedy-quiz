@@ -10,6 +10,11 @@
   max-width: 360px;
 }
 
+.logout {
+  text-align: center;
+  margin-top: 3em;
+}
+
 .error {
   padding: 1em;
   background-color: red;
