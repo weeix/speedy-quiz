@@ -24,6 +24,7 @@ app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
 
 app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
   $scope.$on('quizStarted', function (event, quizID) {
+    var socket = io();
     $http
       .get('/api/v1/quiz/' + quizID.toString() + '?unasked')
       .then(function (response) {
