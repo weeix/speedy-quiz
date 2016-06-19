@@ -24,12 +24,30 @@ app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
 
 app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
   $scope.$on('quizStarted', function (event, quizID) {
+    var questionIDs;
     var socket = io();
+    socket.on('connect', function () {
+      UserAuth.getToken()
+        .then(function(token) {
+          socket.emit('join', token, $scope.selected.gid, function (err) {
+            if (err) {
+              console.log(err);
+              UserAuth.logout();
+              UserAuth.redirect();
+            }
+            $scope.sendQuestion = function() {
+              var questionID = questionIDs.shift().qid;
+              console.log(questionID);
+              socket.emit('ask', questionID);
+            };
+          });
+        });
+    });
     $http
       .get('/api/v1/quiz/' + quizID.toString() + '?unasked')
       .then(function (response) {
         $scope.quizID = quizID;
-        $scope.questionIDs = response.data;
+        questionIDs = response.data;
       });
   });
   $scope.selected = {
@@ -37,6 +55,7 @@ app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $h
     gid: undefined
   };
   $scope.startQuiz = function (pair) {
+    $scope.pressedStartQuiz = true;
     $http
       .post('/api/v1/quiz', pair)
       .then(function (response) {
@@ -128,6 +147,15 @@ app.factory('UserAuth', ['$http', '$window', '$location', '$timeout', '$q', func
       } else {
         $location.path('/login');
       }
+    },
+    getToken: function () {
+      var deferred = $q.defer();
+      if ($window.sessionStorage.token) {
+        deferred.resolve($window.sessionStorage.token);
+      } else {
+        deferred.reject('Error: Token does not exist');
+      }
+      return deferred.promise;
     }
   };
 }]);

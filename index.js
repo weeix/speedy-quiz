@@ -39,4 +39,4 @@ var server = app.listen(3000, function() {
   console.log('Speedy Quiz listening on port 3000!');
 });
 
-require('./socket')(server);
+require('./socket')(server, jwt, secret);

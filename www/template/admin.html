@@ -7,10 +7,11 @@
         <select class="pure-input-1" name="groups" ng-model="selected.gid">
             <option ng-repeat="group in groups" value="{{group.gid}}">{{group.displayName}}</option>
         </select>
-        <input type="submit" class="pure-button pure-button-primary pure-input-1"  value="Start Quiz" />
+        <input type="submit" class="pure-button pure-button-primary pure-input-1"  value="Start Quiz" ng-disabled="pressedStartQuiz" />
     </form>
 </div>
 <div class="admin-quiz" ng-show="quizID">
     <h1>Quiz ID: {{quizID}}</h1>
+    <input type="button" class="pure-button pure-button-primary pure-input-1"  value="Send Question" ng-click="sendQuestion()" />
 </div>
 <div class="logout"><a href="" ng-click="logout()">Logout</a></div>
