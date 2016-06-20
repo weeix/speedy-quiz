@@ -26,6 +26,10 @@ module.exports = function (server, jwt, secret) {
                     socket.on('ask', function (qid) {
                         question.ask(qid, function (err, row) {
                             console.log(err,row);
+                            var choices = JSON.parse(row.choices);
+                            console.log(choices);
+                            shuffle(choices);
+                            console.log(choices);
                             io.to(roomID).emit('question', row);
                         });
                     });
@@ -34,4 +38,18 @@ module.exports = function (server, jwt, secret) {
             });
         });
     });
+}
+
+/**
+ * Shuffles array in place.
+ * @param {Array} a items The array containing the items.
+ */
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length; i; i -= 1) {
+        j = Math.floor(Math.random() * i);
+        x = a[i - 1];
+        a[i - 1] = a[j];
+        a[j] = x;
+    }
 }
