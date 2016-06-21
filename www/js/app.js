@@ -56,7 +56,7 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                   .post('/api/v1/quiz-session/start', {qzid: $scope.quizID, qid: currentQuestion})
                   .then(function (response) {
                     $scope.currentSession = response.data.lastID;
-                    socket.emit('ask', currentQuestion);
+                    socket.emit('ask', currentQuestion, $scope.currentSession);
                     $scope.disableControl = false;
                     $scope.quizState = 2; // Asked
                   });
@@ -127,7 +127,7 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
 app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
   var socket = io();
   socket.on('connect', function () {
-    return UserAuth.getToken()
+    UserAuth.getToken()
       .then(function(token) {
         socket.emit('join', token, null, function (err) {
           if (err) {
@@ -137,7 +137,9 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
           }
           socket.on('question', function(question) {
             $scope.$apply(function () {
+              $scope.lockForm = false;
               $scope.correctAnswerIndex = undefined;
+              $scope.error = undefined;
               $scope.question = question;
             });
           });
@@ -146,6 +148,17 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
               $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
             });
           });
+          $scope.selected = {choices: null};
+          $scope.answer = function (selected) {
+            $scope.lockForm = true;
+            socket.emit('answer', $scope.question.qsid, selected, function (err) {
+              if (err) {
+                $scope.$apply(function () {
+                  $scope.error = err;
+                });
+              }
+            });
+          };
         });
       });
   });

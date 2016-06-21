@@ -1,4 +1,5 @@
 var question = require('./queries/question');
+var answer = require('./queries/answer');
 
 module.exports = function (server, jwt, secret) {
     var io = require('socket.io')(server);
@@ -8,7 +9,7 @@ module.exports = function (server, jwt, secret) {
         socket.on('join', function (token, gid, callback) {
             jwt.verify(token, secret, function (err, decoded) {
                 if (err) {
-                    callback(err);
+                    callback(err.message);
                     return;
                 }
                 if (gid) {
@@ -23,7 +24,7 @@ module.exports = function (server, jwt, secret) {
                 socket.join(roomID);
                 console.log(decoded.displayName + ' (' + ipAddr + ') joined room ID: ' + roomID);
                 if (decoded.role == 0) {
-                    socket.on('ask', function (qid) {
+                    socket.on('ask', function (qid, qsid) {
                         question.ask(qid, function (err, row) {
                             if (err) {
                                 console.log(err);
@@ -31,7 +32,7 @@ module.exports = function (server, jwt, secret) {
                             }
                             var choices = JSON.parse(row.choices);
                             shuffle(choices);
-                            io.to(roomID).emit('question', {question: row.question, choices: choices});
+                            io.to(roomID).emit('question', {qsid: qsid, question: row.question, choices: choices});
                         });
                     });
                     socket.on('solve', function (qid) {
@@ -46,6 +47,15 @@ module.exports = function (server, jwt, secret) {
                         });
                     });
                 }
+                socket.on('answer', function (qsid, answerText, callback) {
+                    answer.add(qsid, decoded.uid, answerText, function (err, result) {
+                        if (err) {
+                            callback(err.message);
+                            return;
+                        }
+                        callback(null);
+                    });
+                });
                 callback(null);
             });
         });
