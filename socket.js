@@ -42,7 +42,6 @@ module.exports = function (server, jwt, secret) {
                             }
                             var choices = JSON.parse(row.choices);
                             var answer = choices[row.answer];
-                            console.log(choices, answer); // DEBUG
                             io.to(roomID).emit('solve-question', answer);
                         });
                     });
