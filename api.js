@@ -58,6 +58,38 @@ module.exports = function () {
     });
   });
 
+  api.post('/quiz-session/start', function (req, res) {
+    adminCheck(req, function (err) {
+      if (err) {
+        res.status(401).send(err.message);
+        return;
+      }
+      quiz.start(req.body.qzid, req.body.qid, function (err, result) {
+        if (err) {
+          res.status(404).send(err.message);
+          return;
+        }
+        res.json(result);
+      })
+    });
+  });
+
+  api.post('/quiz-session/end', function (req, res) {
+    adminCheck(req, function (err) {
+      if (err) {
+        res.status(401).send(err.message);
+        return;
+      }
+      quiz.end(req.body.qsid, function (err, result) {
+        if (err) {
+          res.status(404).send(err.message);
+          return;
+        }
+        res.json(result);
+      })
+    });
+  });
+
   api.get('/quiz/:qzid', function (req, res) {
     adminCheck(req, function (err) {
       var unasked = false;
@@ -69,7 +101,7 @@ module.exports = function () {
         unasked = true;
       }
       if (req.params.qzid) {
-        quiz.show(req.params.qzid, unasked, function (err, rows) {
+        quiz.showQuestions(req.params.qzid, unasked, function (err, rows) {
           if (err) {
             res.status(404).send(err.message);
             return;

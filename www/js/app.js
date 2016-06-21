@@ -50,17 +50,30 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                 });
               });
               $scope.sendQuestion = function() {
+                $scope.disableControl = true;
                 currentQuestion = questionIDs.shift().qid;
-                socket.emit('ask', currentQuestion);
-                $scope.quizState = 2; // Asked
+                $http
+                  .post('/api/v1/quiz-session/start', {qzid: $scope.quizID, qid: currentQuestion})
+                  .then(function (response) {
+                    $scope.currentSession = response.data.lastID;
+                    socket.emit('ask', currentQuestion);
+                    $scope.disableControl = false;
+                    $scope.quizState = 2; // Asked
+                  });
               };
               $scope.solveQuestion = function() {
-                socket.emit('solve', currentQuestion);
-                if (questionIDs.length == 0) {
-                  $scope.quizState = 4; // Finished
-                } else {
-                  $scope.quizState = 3; // Solved
-                }
+                $scope.disableControl = true;
+                $http
+                  .post('/api/v1/quiz-session/end', {qsid: $scope.currentSession})
+                  .then(function (response) {
+                    socket.emit('solve', currentQuestion);
+                    $scope.disableControl = false;
+                    if (questionIDs.length == 0) {
+                      $scope.quizState = 4; // Finished
+                    } else {
+                      $scope.quizState = 3; // Solved
+                    }
+                  });
               };
             });
           });

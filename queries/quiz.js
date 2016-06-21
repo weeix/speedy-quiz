@@ -30,7 +30,35 @@ module.exports.add = (gid, cid, callback) => {
   });
 };
 
-module.exports.show = (qzid, unasked, callback) => {
+module.exports.start = (qzid, qid, callback) => {
+  db.run("INSERT INTO quiz_sessions (qzid, qid) VALUES (?, ?)", [qzid, qid], function (err) {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    var result = {
+      changes: this.changes,
+      lastID: this.lastID
+    }
+    callback(null, result);
+  });
+};
+
+module.exports.end = (qsid, callback) => {
+  db.run("UPDATE quiz_sessions SET end_time = CURRENT_TIMESTAMP WHERE qsid = ?", qsid, function (err) {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    var result = {
+      changes: this.changes,
+      lastID: this.lastID
+    }
+    callback(null, result);
+  });
+};
+
+module.exports.showQuestions = (qzid, unasked, callback) => {
   if (unasked == true) {
     db.all("SELECT questions_collections.qid FROM quizzes \
     LEFT JOIN questions_collections ON quizzes.cid = questions_collections.cid \
