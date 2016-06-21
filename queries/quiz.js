@@ -45,7 +45,7 @@ module.exports.start = (qzid, qid, callback) => {
 };
 
 module.exports.end = (qsid, callback) => {
-  db.run("UPDATE quiz_sessions SET end_time = CURRENT_TIMESTAMP WHERE qsid = ?", qsid, function (err) {
+  db.run("UPDATE quiz_sessions SET end_time = (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')) WHERE qsid = ?", qsid, function (err) {
     if (err) {
       callback(err, null);
       return;

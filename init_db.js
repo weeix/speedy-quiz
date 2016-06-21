@@ -7,16 +7,16 @@ var rl = readline.createInterface({
   input: fs.createReadStream('questions.txt')
 });
 
-db.serialize(function() {
+db.serialize(function () {
   // Quiz Game Schema
   db.run(
     "CREATE TABLE groups (\
     gid INTEGER,\
     displayName TEXT NOT NULL,\
     PRIMARY KEY (gid))",
-    function(err) {
+    function (err) {
       console.log("Table 'groups' created!");
-  });
+    });
   db.run(
     "CREATE TABLE users (\
     uid INTEGER,\
@@ -27,9 +27,9 @@ db.serialize(function() {
     role INTEGER NOT NULL DEFAULT 1,\
     FOREIGN KEY (gid) REFERENCES groups(gid),\
     PRIMARY KEY (uid))",
-    function(err) {
+    function (err) {
       console.log("Table 'users' created!");
-  });
+    });
   db.run(
     "CREATE TABLE questions (\
     qid INTEGER,\
@@ -37,26 +37,26 @@ db.serialize(function() {
     choices TEXT,\
     answer INTEGER,\
     PRIMARY KEY (qid))",
-    function(err) {
+    function (err) {
       console.log("Table 'questions' created!");
-  });
+    });
   db.run(
     "CREATE TABLE collections (\
     cid INTEGER,\
     collectionName TEXT,\
     PRIMARY KEY (cid))",
-    function(err) {
+    function (err) {
       console.log("Table 'collections' created!");
-  });
+    });
   db.run(
     "CREATE TABLE questions_collections (\
     qid INTEGER,\
     cid INTEGER,\
     FOREIGN KEY (qid) REFERENCES questions(qid),\
     FOREIGN KEY (cid) REFERENCES collections(cid))",
-    function(err) {
+    function (err) {
       console.log("Table 'questions_collections' created!");
-  });
+    });
   db.run(
     "CREATE TABLE quizzes (\
     qzid INTEGER,\
@@ -65,43 +65,43 @@ db.serialize(function() {
     FOREIGN KEY (gid) REFERENCES groups(gid),\
     FOREIGN KEY (cid) REFERENCES collections(cid),\
     PRIMARY KEY (qzid))",
-    function(err) {
+    function (err) {
       console.log("Table 'quizzes' created!");
-  });
+    });
   db.run(
     "CREATE TABLE quiz_sessions (\
     qsid INTEGER,\
     qzid INTEGER,\
     qid INTEGER,\
-    start_time DATETIME DEFAULT CURRENT_TIMESTAMP,\
+    start_time DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')),\
     end_time DATETIME,\
     FOREIGN KEY (qzid) REFERENCES quizzes(qzid),\
     FOREIGN KEY (qid) REFERENCES questions(qid),\
     PRIMARY KEY (qsid))",
-    function(err) {
+    function (err) {
       console.log("Table 'quiz_sessions' created!");
-  });
+    });
   db.run(
     "CREATE TABLE answered (\
     aid INTEGER,\
     qsid INTEGER,\
     uid INTEGER,\
     answer INTEGER,\
-    answered_time DATETIME DEFAULT CURRENT_TIMESTAMP,\
+    answered_time DATETIME DEFAULT (STRFTIME('%Y-%m-%d %H:%M:%f', 'NOW')),\
     FOREIGN KEY (qsid) REFERENCES quiz_sessions(qsid),\
     FOREIGN KEY (uid) REFERENCES users(uid),\
     PRIMARY KEY (aid))",
-    function(err) {
+    function (err) {
       console.log("Table 'answered' created!");
-  });
-  
+    });
+
   // Fill Groups Table
   var stmt = db.prepare("INSERT INTO groups (gid, displayName) VALUES (?, ?)");
   stmt.run(1, "ผู้เข้าร่วมอบรม");
-  stmt.finalize(function(err) {
+  stmt.finalize(function (err) {
     console.log("Groups table filled!");
   });
-  
+
   // Fill Users Table
   var stmt = db.prepare("INSERT INTO users (uid, gid, username, password, displayName, role) VALUES (?, ?, ?, ?, ?, ?)");
   stmt.run(1, null, "admin", "Qz654321", "ผู้ดูแลระบบ", 0);
@@ -111,31 +111,31 @@ db.serialize(function() {
   stmt.run(5, 1, "g4", "Qz123456", "กลุ่ม 4", 1);
   stmt.run(6, 1, "g5", "Qz123456", "กลุ่ม 5", 1);
   stmt.run(7, 1, "g6", "Qz123456", "กลุ่ม 6", 1);
-  stmt.finalize(function(err) {
+  stmt.finalize(function (err) {
     console.log("Users table filled!");
   });
-  
+
   // Fill Collections Table
   var stmt = db.prepare("INSERT INTO collections (cid, collectionName) VALUES (?, ?)");
   stmt.run(1, "ชุดคำถามที่ 1");
-  stmt.finalize(function(err) {
+  stmt.finalize(function (err) {
     console.log("Collections table filled!");
   });
-  
+
   // Import Questions
   var stmt = db.prepare("INSERT INTO questions (question, choices, answer) VALUES (?, ?, ?)");
   var count = 0;
   var question = "";
   var choices = [];
   var answer;
-  var saveToDB = function() {
+  var saveToDB = function () {
     if (question.length !== 0 && answer != null) {
       stmt.run(question, JSON.stringify(choices), answer);
       question = "";
       choices = [];
       answer = undefined;
     }
-  }
+  };
   rl.on('line', (line) => {
     count++;
     line = line.trim();
@@ -154,17 +154,17 @@ db.serialize(function() {
     }
   });
   rl.on('close', () => {
-    saveToDB(question, choices, answer);
-    stmt.finalize(function(err) {
+    saveToDB();
+    stmt.finalize(function (err) {
       if (err) { console.log(err); }
       console.log("Questions imported!");
-      
+
       // Add all questions to default collection
       var stmt = db.prepare("INSERT INTO questions_collections (qid, cid) VALUES (?, ?)");
       db.each("SELECT qid FROM questions", (err, row) => {
         stmt.run(row.qid, 1);
       }, (err, num) => {
-        stmt.finalize(function(err) {
+        stmt.finalize(function (err) {
           console.log("Added all questions to the default collection!");
         });
       });
@@ -172,6 +172,6 @@ db.serialize(function() {
   });
 });
 
-db.close(function(err) {
+db.close(function (err) {
   console.log("Database initialization completed!");
 });
