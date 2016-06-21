@@ -1,0 +1,15 @@
+<div class="user" ng-show="!question">
+    <h1>Please wait</h1>
+    <p>Your question will appear soon</p>
+</div>
+<div class="user-question" ng-show="question">
+    <strong>{{question.question}}</strong>
+    <form class="pure-form pure-form-stacked" ng-submit="answer(selected)">
+        <label ng-repeat="choice in question.choices" for="choice-{{$index+1}}" class="pure-radio">
+            <input id="choice-{{$index+1}}" type="radio" name="choices" value="{{choice}}">
+            {{$index+1}}. {{choice}}
+        </label>
+        <input type="submit" class="pure-button pure-button-primary pure-input-1" value="Answer" />
+    </form>
+</div>
+<div class="logout"><a href="" ng-click="logout()">Logout</a></div>

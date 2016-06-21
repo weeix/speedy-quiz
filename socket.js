@@ -21,7 +21,7 @@ module.exports = function (server, jwt, secret) {
                     return;
                 }
                 socket.join(roomID);
-                console.log(decoded.displayName + ' (' + ipAddr + ') joined room ID: ' + gid);
+                console.log(decoded.displayName + ' (' + ipAddr + ') joined room ID: ' + roomID);
                 if (decoded.role == 0) {
                     socket.on('ask', function (qid) {
                         question.ask(qid, function (err, row) {

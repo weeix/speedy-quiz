@@ -16,8 +16,26 @@
   max-width: 720px;
 }
 
-.question {
+.admin-control {
+  margin-bottom: 1em;
+}
+
+.admin-question {
   padding-left: 1em;
+  font-size: 1.5em;
+}
+
+.user {
+  padding: 5% 1em 1em;
+  margin: 0 auto;
+  max-width: 640px;
+}
+
+.user-question {
+  padding: 5% 1em 1em;
+  margin: 0 auto;
+  max-width: 640px;
+  font-size: 1.5em;
 }
 
 .logout {

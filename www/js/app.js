@@ -189,7 +189,7 @@ app.factory('UserAuth', ['$http', '$window', '$location', '$timeout', '$q', func
       if (this.state.role === 0) {
         $location.path('/admin');
       } else if (this.state.role === 1) {
-        $location.path('/about');
+        $location.path('/quiz');
       } else {
         $location.path('/login');
       }
@@ -229,15 +229,13 @@ app.factory('authInterceptor', ['$rootScope', '$q', '$window', '$injector', func
 
 app.config(['$routeProvider', '$httpProvider', function ($routeProvider, $httpProvider) {
   $routeProvider.
-    when('/', {
-      templateUrl: 'template/test.html'
-    }).
     when('/login', {
       templateUrl: 'template/login.html',
       controller: 'LoginCtrl'
     }).
-    when('/about', {
-      templateUrl: 'template/test2.html'
+    when('/quiz', {
+      templateUrl: 'template/user.html',
+      controller: 'UserCtrl'
     }).
     when('/admin', {
       templateUrl: 'template/admin.html',
