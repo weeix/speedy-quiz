@@ -40,7 +40,13 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
               }
               socket.on('question', function(question) {
                 $scope.$apply(function () {
+                  $scope.correctAnswerIndex = undefined;
                   $scope.question = question;
+                });
+              });
+              socket.on('solve-question', function(answer) {
+                $scope.$apply(function () {
+                  $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
                 });
               });
               $scope.sendQuestion = function() {
@@ -50,7 +56,11 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
               };
               $scope.solveQuestion = function() {
                 socket.emit('solve', currentQuestion);
-                $scope.quizState = 3; // Solved
+                if (questionIDs.length == 0) {
+                  $scope.quizState = 4; // Finished
+                } else {
+                  $scope.quizState = 3; // Solved
+                }
               };
             });
           });
@@ -114,7 +124,13 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
           }
           socket.on('question', function(question) {
             $scope.$apply(function () {
+              $scope.correctAnswerIndex = undefined;
               $scope.question = question;
+            });
+          });
+          socket.on('solve-question', function(answer) {
+            $scope.$apply(function () {
+              $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
             });
           });
         });

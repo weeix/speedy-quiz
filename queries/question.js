@@ -15,3 +15,18 @@ module.exports.ask = (qid, callback) => {
     callback(null, row);
   })
 }
+
+module.exports.solve = (qid, callback) => {
+  db.get("SELECT choices, answer FROM questions WHERE qid = ?", qid, function (err, row) {
+    if (err) {
+      callback(err, null);
+      return;
+    }
+    if (row == null) {
+      err = new Error('Question not found');
+      callback(err, null);
+      return;
+    }
+    callback(null, row);
+  })
+}

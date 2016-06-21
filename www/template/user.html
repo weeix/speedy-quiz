@@ -5,7 +5,7 @@
 <div class="user-question" ng-show="question">
     <strong>{{question.question}}</strong>
     <form class="pure-form pure-form-stacked" ng-submit="answer(selected)">
-        <label ng-repeat="choice in question.choices" for="choice-{{$index+1}}" class="pure-radio">
+        <label ng-class="{ 'correct-answer': $index == correctAnswerIndex }" ng-repeat="choice in question.choices" for="choice-{{$index+1}}" class="pure-radio">
             <input id="choice-{{$index+1}}" type="radio" name="choices" value="{{choice}}">
             {{$index+1}}. {{choice}}
         </label>

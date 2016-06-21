@@ -34,6 +34,18 @@ module.exports = function (server, jwt, secret) {
                             io.to(roomID).emit('question', {question: row.question, choices: choices});
                         });
                     });
+                    socket.on('solve', function (qid) {
+                        question.solve(qid, function (err, row) {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            var choices = JSON.parse(row.choices);
+                            var answer = choices[row.answer];
+                            console.log(choices, answer); // DEBUG
+                            io.to(roomID).emit('solve-question', answer);
+                        });
+                    });
                 }
                 callback(null);
             });
