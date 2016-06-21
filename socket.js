@@ -25,12 +25,13 @@ module.exports = function (server, jwt, secret) {
                 if (decoded.role == 0) {
                     socket.on('ask', function (qid) {
                         question.ask(qid, function (err, row) {
-                            console.log(err,row);
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
                             var choices = JSON.parse(row.choices);
-                            console.log(choices);
                             shuffle(choices);
-                            console.log(choices);
-                            io.to(roomID).emit('question', row);
+                            io.to(roomID).emit('question', {question: row.question, choices: choices});
                         });
                     });
                 }
