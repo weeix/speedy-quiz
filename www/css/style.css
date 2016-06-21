@@ -16,6 +16,10 @@
   max-width: 720px;
 }
 
+.question {
+  padding-left: 1em;
+}
+
 .logout {
   text-align: center;
   margin-top: 3em;

@@ -22,33 +22,54 @@ app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
     };
 }]);
 
-app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
+app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($scope, $http, $q, UserAuth) {
   $scope.$on('quizStarted', function (event, quizID) {
-    var questionIDs;
+    $scope.quizState = 0; // 0 = Init, 1 = Ready, 2 = Asked, 3 = Solved, 4 = Finished
     var socket = io();
-    socket.on('connect', function () {
-      UserAuth.getToken()
-        .then(function(token) {
-          socket.emit('join', token, $scope.selected.gid, function (err) {
-            if (err) {
-              console.log(err);
-              UserAuth.logout();
-              UserAuth.redirect();
-            }
-            $scope.sendQuestion = function() {
-              var questionID = questionIDs.shift().qid;
-              console.log(questionID);
-              socket.emit('ask', questionID);
-            };
+    var questionIDs;
+    var currentQuestion;
+    var openSocket = function() {
+      socket.on('connect', function () {
+        return UserAuth.getToken()
+          .then(function(token) {
+            socket.emit('join', token, $scope.selected.gid, function (err) {
+              if (err) {
+                console.log(err);
+                UserAuth.logout();
+                UserAuth.redirect();
+              }
+              socket.on('question', function(question) {
+                $scope.$apply(function () {
+                  $scope.question = question;
+                });
+              });
+              $scope.sendQuestion = function() {
+                currentQuestion = questionIDs.shift().qid;
+                socket.emit('ask', currentQuestion);
+                $scope.quizState = 2; // Asked
+              };
+              $scope.solveQuestion = function() {
+                socket.emit('solve', currentQuestion);
+                $scope.quizState = 3; // Solved
+              };
+            });
           });
-        });
-    });
-    $http
-      .get('/api/v1/quiz/' + quizID.toString() + '?unasked')
-      .then(function (response) {
-        $scope.quizID = quizID;
-        questionIDs = response.data;
       });
+    };
+    var getQuestions = function () {
+      return $http
+        .get('/api/v1/quiz/' + quizID.toString() + '?unasked')
+        .then(function (response) {
+          questionIDs = response.data;
+        });
+    };
+    $q.all([
+      openSocket(),
+      getQuestions()
+    ]).then(function () {
+      $scope.quizID = quizID;
+      $scope.quizState = 1; // Ready
+    });
   });
   $scope.selected = {
     cid: undefined,
@@ -78,6 +99,31 @@ app.controller('AdminCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $h
       $scope.groups = response.data;
       $scope.selected.gid = response.data[0].gid.toString();
     });
+}]);
+
+app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
+  var socket = io();
+  socket.on('connect', function () {
+    return UserAuth.getToken()
+      .then(function(token) {
+        socket.emit('join', token, null, function (err) {
+          if (err) {
+            console.log(err);
+            UserAuth.logout();
+            UserAuth.redirect();
+          }
+          socket.on('question', function(question) {
+            $scope.$apply(function () {
+              $scope.question = question;
+            });
+          });
+        });
+      });
+  });
+  $scope.logout = function () {
+    UserAuth.logout();
+    UserAuth.redirect();
+  };
 }]);
 
 app.factory('UserAuth', ['$http', '$window', '$location', '$timeout', '$q', function ($http, $window, $location, $timeout, $q) {
