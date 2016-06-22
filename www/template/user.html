@@ -3,7 +3,7 @@
     <p>Your question will appear soon</p>
 </div>
 <div class="user-question" ng-show="question">
-    <strong>{{question.question}}</strong>
+    <strong>{{question.qsid}}. {{question.question}}</strong>
     <form class="pure-form pure-form-stacked" ng-submit="answer(selected.choices)">
         <label ng-class="{ 'correct-answer': $index == correctAnswerIndex }" ng-repeat="choice in question.choices" for="choice-{{$index+1}}" class="pure-radio">
             <input ng-disabled="lockForm" id="choice-{{$index+1}}" type="radio" ng-model="selected.choices" name="choices" value="{{choice}}">
