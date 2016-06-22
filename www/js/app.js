@@ -161,11 +161,11 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
           });
           socket.on('solve-question', function(answer) {
             $scope.$apply(function () {
-              $scope.lockForm = true;
               $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
-              if ($scope.selected.choice == answer) {
+              if ($scope.selected.choice == answer && $scope.lockForm) {
                 $scope.success = 'Correct!'
               }
+              $scope.lockForm = true;
             });
           });
           $scope.selected = {choice: null};
