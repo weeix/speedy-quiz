@@ -25,9 +25,51 @@ app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
 app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($scope, $http, $q, UserAuth) {
   $scope.$on('quizStarted', function (event, quizID) {
     $scope.quizState = 0; // 0 = Init, 1 = Ready, 2 = Asked, 3 = Solved, 4 = Finished
+    $scope.scoreTable = {
+      head: [],
+      body: []
+    };
     var socket = io();
     var questionIDs;
     var currentQuestion;
+    var archiveScore = function(answerList, correctAnswer, sessionID) {
+      $scope.scoreTable.head.push(sessionID);
+      var index = $scope.scoreTable.head.indexOf(sessionID);
+      var firstCorrect = false;
+      var secondCorrect = false;
+      for (var h=0; h<$scope.scoreTable.body.length; h++) {
+        $scope.scoreTable.body[h].points[index] = null;
+      }
+      for (var i=0; i<answerList.length; i++) {
+        var oldDataExist = false;
+        var point = 0;
+        if (answerList[i].answer == correctAnswer) {
+          if (!firstCorrect) {
+            point = 2;
+            firstCorrect = true;
+          } else if (!secondCorrect) {
+            point = 1.5;
+            secondCorrect = true;
+          } else {
+            point = 1;
+          }
+        }
+        for (var j=0; j<$scope.scoreTable.body.length; j++) {
+          if (answerList[i].displayName == $scope.scoreTable.body[j].displayName) {
+            $scope.scoreTable.body[j].points[index] = point;
+            oldDataExist = true;
+          }
+        }
+        if (!oldDataExist) {
+          var newData = {
+            displayName: answerList[i].displayName,
+            points: []
+          };
+          newData.points[index] = point;
+          $scope.scoreTable.body.push(newData);
+        }
+      }
+    };
     var openSocket = function() {
       socket.on('connect', function () {
         return UserAuth.getToken()
@@ -49,6 +91,7 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                 $scope.$apply(function () {
                   $scope.correctAnswerText = answer;
                   $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
+                  archiveScore($scope.answerList, answer, $scope.currentSession);
                 });
               });
               socket.on('answer-question', function(result) {
@@ -62,9 +105,6 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                   });
                 });
               });
-              $scope.ansTextToIndex = function (text) {
-                return $scope.question.choices.indexOf(text);
-              };
               $scope.sendQuestion = function() {
                 $scope.disableControl = true;
                 currentQuestion = questionIDs.shift().qid;
@@ -90,6 +130,16 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                       $scope.quizState = 3; // Solved
                     }
                   });
+              };
+              $scope.ansTextToIndex = function (text) {
+                return $scope.question.choices.indexOf(text);
+              };
+              $scope.sumArray = function(arrayOfNumbers) {
+                var sum = 0;
+                for (var i=0; i<arrayOfNumbers.length; i++) {
+                  if(arrayOfNumbers[i] != undefined) sum += arrayOfNumbers[i];
+                }
+                return sum;
               };
             });
           });

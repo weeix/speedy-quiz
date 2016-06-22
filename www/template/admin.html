@@ -7,7 +7,8 @@
         <select class="pure-input-1" name="groups" ng-model="selected.gid">
             <option ng-repeat="group in groups" value="{{group.gid}}">{{group.displayName}}</option>
         </select>
-        <input type="submit" class="pure-button pure-button-primary pure-input-1"  value="Start Quiz" ng-disabled="pressedStartQuiz" />
+        <input type="submit" class="pure-button pure-button-primary pure-input-1" value="Start Quiz" ng-disabled="pressedStartQuiz"
+        />
     </form>
 </div>
 <div class="admin-quiz" ng-show="quizID">
@@ -23,8 +24,10 @@
         </div>
         <div class="pure-u-1 pure-u-md-1-3">
             <form class="admin-control pure-form">
-                <input type="button" class="pure-button pure-button-primary pure-input-1" value="Send Question" ng-disabled="disableControl" ng-show="quizState == 1 || quizState == 3" ng-click="sendQuestion()" />
-                <input type="button" class="pure-button pure-button-success pure-input-1" value="Solve Question" ng-disabled="disableControl" ng-show="quizState == 2" ng-click="solveQuestion()" />
+                <input type="button" class="pure-button pure-button-primary pure-input-1" value="Send Question" ng-disabled="disableControl"
+                    ng-show="quizState == 1 || quizState == 3" ng-click="sendQuestion()" />
+                <input type="button" class="pure-button pure-button-success pure-input-1" value="Solve Question" ng-disabled="disableControl"
+                    ng-show="quizState == 2" ng-click="solveQuestion()" />
             </form>
             <div class="answer-list">
                 <ul>
@@ -32,6 +35,24 @@
                 </ul>
             </div>
         </div>
+    </div>
+    <div class="score-board" ng-show="scoreTable.body.length > 0">
+        <table class="pure-table pure-table-bordered">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th ng-repeat="sessionID in scoreTable.head track by $index">{{sessionID}}</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="user in scoreTable.body | orderBy:'displayName'">
+                    <td>{{user.displayName}}</td>
+                    <td ng-repeat="point in user.points track by $index">{{point}}</td>
+                    <td>{{sumArray(user.points)}}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="logout"><a href="" ng-click="logout()">Logout</a></div>

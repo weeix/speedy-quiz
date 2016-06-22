@@ -32,6 +32,11 @@
   overflow-y: scroll;
 }
 
+.score-board {
+  margin-top: 1em;
+  overflow-x: auto;
+}
+
 .user {
   padding: 5% 1em 1em;
   margin: 0 auto;
