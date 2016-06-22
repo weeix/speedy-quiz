@@ -35,18 +35,29 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
             socket.emit('join', token, $scope.selected.gid, function (err) {
               if (err) {
                 console.log(err);
-                UserAuth.logout();
-                UserAuth.redirect();
+                return;
               }
               socket.on('question', function(question) {
                 $scope.$apply(function () {
                   $scope.correctAnswerIndex = undefined;
+                  $scope.answerList = undefined;
                   $scope.question = question;
                 });
               });
               socket.on('solve-question', function(answer) {
                 $scope.$apply(function () {
                   $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
+                });
+              });
+              socket.on('answer-question', function(result) {
+                socket.emit('list-answer', $scope.currentSession, function (err, list) {
+                  if (err) {
+                    console.log(err);
+                    return;
+                  }
+                  $scope.$apply(function () {
+                    $scope.answerList = list;
+                  });
                 });
               });
               $scope.sendQuestion = function() {
@@ -132,8 +143,7 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
         socket.emit('join', token, null, function (err) {
           if (err) {
             console.log(err);
-            UserAuth.logout();
-            UserAuth.redirect();
+            return;
           }
           socket.on('question', function(question) {
             $scope.$apply(function () {

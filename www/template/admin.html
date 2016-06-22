@@ -26,6 +26,11 @@
                 <input type="button" class="pure-button pure-button-primary pure-input-1" value="Send Question" ng-disabled="disableControl" ng-show="quizState == 1 || quizState == 3" ng-click="sendQuestion()" />
                 <input type="button" class="pure-button pure-button-success pure-input-1" value="Solve Question" ng-disabled="disableControl" ng-show="quizState == 2" ng-click="solveQuestion()" />
             </form>
+            <div class="answer-list">
+                <ul>
+                    <li ng-repeat="answer in answerList">{{answer.displayName}} answered</li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>

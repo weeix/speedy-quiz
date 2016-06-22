@@ -17,12 +17,19 @@
 }
 
 .admin-control {
-  margin-top: 1em;
-  padding-left: 1em;
+  margin: 1em auto 1em 1em;
 }
 
 .admin-question {
   font-size: 1.5em;
+}
+
+.answer-list {
+  margin-left: 1em;
+  background-color: #ddd;
+  min-height: 150px;
+  max-height: 250px;
+  overflow-y: scroll;
 }
 
 .user {

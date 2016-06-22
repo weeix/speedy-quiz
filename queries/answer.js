@@ -46,15 +46,25 @@ module.exports.add = (qsid, uid, answerText, callback) => {
 };
 
 module.exports.list = (qsid, callback) => {
-    db.all("SELECT answered.uid, users.displayName, answered.answer, questions.choices FROM answered \
+    var rows = [];
+    db.each("SELECT answered.uid, users.displayName, answered.answer, questions.choices, answered.answered_time FROM answered \
     LEFT JOIN quiz_sessions ON answered.qsid = quiz_sessions.qsid \
     LEFT JOIN users ON answered.uid = users.uid \
     LEFT JOIN questions ON quiz_sessions.qid = questions.qid \
-    WHERE answered.qsid = ? ORDER BY answered.answered_time ASC", qsid, function (err, rows) {
+    WHERE answered.qsid = ? ORDER BY answered.answered_time ASC", qsid, function (err, row) {
             if (err) {
                 callback(err, null);
                 return;
             }
+            var choices = JSON.parse(row.choices);
+            var newRow = {
+                uid: row.uid,
+                displayName: row.displayName,
+                answer: choices[row.answer],
+                answered_time: row.answered_time
+            };
+            rows.push(newRow);
+        }, function () {
             callback(null, rows);
         });
 };

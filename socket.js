@@ -46,6 +46,15 @@ module.exports = function (server, jwt, secret) {
                             io.to(roomID).emit('solve-question', answer);
                         });
                     });
+                    socket.on('list-answer', function (qsid, callback) {
+                        answer.list(qsid, function (err, rows) {
+                            if (err) {
+                                callback(err.message, null);
+                                return;
+                            }
+                            callback(null, rows);
+                        });
+                    });
                 }
                 socket.on('answer', function (qsid, answerText, callback) {
                     answer.add(qsid, decoded.uid, answerText, function (err, result) {
