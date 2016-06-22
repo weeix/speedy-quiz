@@ -163,8 +163,13 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
               $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
             });
           });
-          $scope.selected = {choices: null};
+          $scope.selected = {choice: null};
           $scope.answer = function (selected) {
+            $scope.error = undefined;
+            if (selected == null) {
+              $scope.error = 'Please select your answer';
+              return;
+            }
             $scope.lockForm = true;
             socket.emit('answer', $scope.question.qsid, selected, function (err) {
               if (err) {
