@@ -39,6 +39,7 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
               }
               socket.on('question', function(question) {
                 $scope.$apply(function () {
+                  $scope.correctAnswerText = undefined;
                   $scope.correctAnswerIndex = undefined;
                   $scope.answerList = undefined;
                   $scope.question = question;
@@ -46,6 +47,7 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
               });
               socket.on('solve-question', function(answer) {
                 $scope.$apply(function () {
+                  $scope.correctAnswerText = answer;
                   $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
                 });
               });
@@ -60,6 +62,9 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                   });
                 });
               });
+              $scope.ansTextToIndex = function (text) {
+                return $scope.question.choices.indexOf(text);
+              };
               $scope.sendQuestion = function() {
                 $scope.disableControl = true;
                 currentQuestion = questionIDs.shift().qid;
