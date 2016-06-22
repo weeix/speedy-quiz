@@ -154,6 +154,7 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
             $scope.$apply(function () {
               $scope.lockForm = false;
               $scope.correctAnswerIndex = undefined;
+              $scope.success = undefined;
               $scope.error = undefined;
               $scope.question = question;
             });
@@ -161,13 +162,17 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
           socket.on('solve-question', function(answer) {
             $scope.$apply(function () {
               $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
+              if ($scope.selected.choice == answer) {
+                $scope.success = 'Correct!'
+              }
             });
           });
           $scope.selected = {choice: null};
           $scope.answer = function (selected) {
+            $scope.success = undefined;
             $scope.error = undefined;
             if (selected == null) {
-              $scope.error = 'Please select your answer';
+              $scope.error = 'Please select an answer';
               return;
             }
             $scope.lockForm = true;

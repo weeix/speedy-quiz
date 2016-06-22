@@ -50,11 +50,18 @@
   margin-top: 3em;
 }
 
-.error {
+.error, .success {
   padding: 1em;
-  background-color: red;
   color: white;
   margin: 1em 0;
+}
+
+.error {
+  background-color: red;
+}
+
+.success {
+  background-color: green;
 }
 
 .correct-answer {

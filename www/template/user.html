@@ -11,6 +11,7 @@
         </label>
         <input ng-disabled="lockForm || !selected.choice" type="submit" class="pure-button pure-button-primary pure-input-1" value="Answer" />
     </form>
+    <div ng-show="success" class="success">{{success}}</div>
     <div ng-show="error" class="error">{{error}}</div>
 </div>
 <div class="logout"><a href="" ng-click="logout()">Logout</a></div>
