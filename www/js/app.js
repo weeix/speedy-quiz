@@ -154,6 +154,7 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
             $scope.$apply(function () {
               $scope.lockForm = false;
               $scope.correctAnswerIndex = undefined;
+              $scope.selected.choice = undefined;
               $scope.success = undefined;
               $scope.error = undefined;
               $scope.question = question;
