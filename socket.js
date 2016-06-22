@@ -54,6 +54,7 @@ module.exports = function (server, jwt, secret) {
                             return;
                         }
                         callback(null);
+                        io.to(roomID).emit('answer-question', result);
                     });
                 });
                 callback(null);

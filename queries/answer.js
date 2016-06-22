@@ -36,11 +36,25 @@ module.exports.add = (qsid, uid, answerText, callback) => {
                         return;
                     }
                     var result = {
-                    changes: this.changes,
-                    lastID: this.lastID
+                        changes: this.changes,
+                        lastID: this.lastID
                     }
                     callback(null, result);
                 });
             });
     });
+};
+
+module.exports.list = (qsid, callback) => {
+    db.all("SELECT answered.uid, users.displayName, answered.answer, questions.choices FROM answered \
+    LEFT JOIN quiz_sessions ON answered.qsid = quiz_sessions.qsid \
+    LEFT JOIN users ON answered.uid = users.uid \
+    LEFT JOIN questions ON quiz_sessions.qid = questions.qid \
+    WHERE answered.qsid = ? ORDER BY answered.answered_time ASC", qsid, function (err, rows) {
+            if (err) {
+                callback(err, null);
+                return;
+            }
+            callback(null, rows);
+        });
 };
