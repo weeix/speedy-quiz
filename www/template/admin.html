@@ -28,7 +28,7 @@
             </form>
             <div class="answer-list">
                 <ul>
-                    <li ng-repeat="answer in answerList" title="{{answer.answered_time}}">{{answer.displayName}} answered <span class="badge" ng-show="quizState == 3" ng-class="{ correct: answer.answer == correctAnswerText }">{{ansTextToIndex(answer.answer)+1}}</span></li>
+                    <li ng-repeat="answer in answerList" title="{{answer.answered_time}}">{{answer.displayName}} answered <span class="badge" ng-show="quizState == 3 || quizState == 4" ng-class="{ correct: answer.answer == correctAnswerText }">{{ansTextToIndex(answer.answer)+1}}</span></li>
                 </ul>
             </div>
         </div>
