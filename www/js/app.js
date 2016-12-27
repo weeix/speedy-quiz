@@ -1,11 +1,11 @@
 var app = angular.module('app', ['components', 'ngRoute']);
 
 app.controller('MainCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
-  $scope.$on('$locationChangeStart', function(event, newUrl) {
+  $scope.$on('$locationChangeStart', function (event, newUrl) {
     UserAuth.redirect();
   });
   UserAuth.setAuth()
-    .finally(function() {
+    .finally(function () {
       $scope.userState = UserAuth.state;
     });
 }]);
@@ -16,10 +16,10 @@ app.controller('LoginCtrl', ['$scope', 'UserAuth', function ($scope, UserAuth) {
     UserAuth.login(user)
       .then(function () {
         UserAuth.redirect();
-      }, function(err) {
+      }, function (err) {
         $scope.error = err;
       });
-    };
+  };
 }]);
 
 app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($scope, $http, $q, UserAuth) {
@@ -32,15 +32,16 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
     var socket = io();
     var questionIDs;
     var currentQuestion;
-    var archiveScore = function(answerList, correctAnswer, sessionID) {
+
+    var archiveScore = function (answerList, correctAnswer, sessionID) {
       $scope.scoreTable.head.push(sessionID);
       var index = $scope.scoreTable.head.indexOf(sessionID);
       var firstCorrect = false;
       var secondCorrect = false;
-      for (var h=0; h<$scope.scoreTable.body.length; h++) {
+      for (var h = 0; h < $scope.scoreTable.body.length; h++) {
         $scope.scoreTable.body[h].points[index] = null;
       }
-      for (var i=0; i<answerList.length; i++) {
+      for (var i = 0; i < answerList.length; i++) {
         var oldDataExist = false;
         var point = 0;
         if (answerList[i].answer == correctAnswer) {
@@ -54,7 +55,7 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
             point = 1;
           }
         }
-        for (var j=0; j<$scope.scoreTable.body.length; j++) {
+        for (var j = 0; j < $scope.scoreTable.body.length; j++) {
           if (answerList[i].displayName == $scope.scoreTable.body[j].displayName) {
             $scope.scoreTable.body[j].points[index] = point;
             oldDataExist = true;
@@ -70,16 +71,19 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
         }
       }
     };
-    var openSocket = function() {
+
+    var openSocket = function () {
       socket.on('connect', function () {
         return UserAuth.getToken()
-          .then(function(token) {
+          .then(function (token) {
+
             socket.emit('join', token, $scope.selected.gid, function (err) {
               if (err) {
                 console.log(err);
                 return;
               }
-              socket.on('question', function(question) {
+
+              socket.on('question', function (question) {
                 $scope.$apply(function () {
                   $scope.correctAnswerText = undefined;
                   $scope.correctAnswerIndex = undefined;
@@ -87,14 +91,16 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                   $scope.question = question;
                 });
               });
-              socket.on('solve-question', function(answer) {
+
+              socket.on('solve-question', function (answer) {
                 $scope.$apply(function () {
                   $scope.correctAnswerText = answer;
                   $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
                   archiveScore($scope.answerList, answer, $scope.currentSession);
                 });
               });
-              socket.on('answer-question', function(result) {
+
+              socket.on('answer-question', function (result) {
                 socket.emit('list-answer', $scope.currentSession, function (err, list) {
                   if (err) {
                     console.log(err);
@@ -105,11 +111,12 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                   });
                 });
               });
-              $scope.sendQuestion = function() {
+
+              $scope.sendQuestion = function () {
                 $scope.disableControl = true;
                 currentQuestion = questionIDs.shift().qid;
                 $http
-                  .post('/api/v1/quiz-session/start', {qzid: $scope.quizID, qid: currentQuestion})
+                  .post('/api/v1/quiz-session/start', { qzid: $scope.quizID, qid: currentQuestion })
                   .then(function (response) {
                     $scope.currentSession = response.data.lastID;
                     socket.emit('ask', currentQuestion, $scope.currentSession);
@@ -117,10 +124,11 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                     $scope.quizState = 2; // Asked
                   });
               };
-              $scope.solveQuestion = function() {
+
+              $scope.solveQuestion = function () {
                 $scope.disableControl = true;
                 $http
-                  .post('/api/v1/quiz-session/end', {qsid: $scope.currentSession})
+                  .post('/api/v1/quiz-session/end', { qsid: $scope.currentSession })
                   .then(function (response) {
                     socket.emit('solve', currentQuestion);
                     $scope.disableControl = false;
@@ -131,20 +139,24 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
                     }
                   });
               };
+
               $scope.ansTextToIndex = function (text) {
                 return $scope.question.choices.indexOf(text);
               };
-              $scope.sumArray = function(arrayOfNumbers) {
+
+              $scope.sumArray = function (arrayOfNumbers) {
                 var sum = 0;
-                for (var i=0; i<arrayOfNumbers.length; i++) {
-                  if(arrayOfNumbers[i] != undefined) sum += arrayOfNumbers[i];
+                for (var i = 0; i < arrayOfNumbers.length; i++) {
+                  if (arrayOfNumbers[i] != undefined) sum += arrayOfNumbers[i];
                 }
                 return sum;
               };
+
             });
           });
       });
     };
+
     var getQuestions = function () {
       return $http
         .get('/api/v1/quiz/' + quizID.toString() + '?unasked')
@@ -152,6 +164,7 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
           questionIDs = response.data;
         });
     };
+
     $q.all([
       openSocket(),
       getQuestions()
@@ -159,11 +172,14 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
       $scope.quizID = quizID;
       $scope.quizState = 1; // Ready
     });
+
   });
+
   $scope.selected = {
     cid: undefined,
     gid: undefined
   };
+
   $scope.startQuiz = function (pair) {
     $scope.pressedStartQuiz = true;
     $http
@@ -172,35 +188,43 @@ app.controller('AdminCtrl', ['$scope', '$http', '$q', 'UserAuth', function ($sco
         $scope.$emit('quizStarted', response.data.lastID);
       });
   }
+
   $scope.logout = function () {
     UserAuth.logout();
     UserAuth.redirect();
   };
+
   $http
     .get('/api/v1/collection')
     .then(function (response) {
       $scope.collections = response.data;
       $scope.selected.cid = response.data[0].cid.toString();
     });
+
   $http
     .get('/api/v1/group')
     .then(function (response) {
       $scope.groups = response.data;
       $scope.selected.gid = response.data[0].gid.toString();
     });
-}]);
+
+}]); // END AdminCtrl
 
 app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $http, UserAuth) {
+
   var socket = io();
+
   socket.on('connect', function () {
     UserAuth.getToken()
-      .then(function(token) {
+      .then(function (token) {
+
         socket.emit('join', token, null, function (err) {
           if (err) {
             console.log(err);
             return;
           }
-          socket.on('question', function(question) {
+
+          socket.on('question', function (question) {
             $scope.$apply(function () {
               $scope.lockForm = false;
               $scope.correctAnswerIndex = undefined;
@@ -210,7 +234,8 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
               $scope.question = question;
             });
           });
-          socket.on('solve-question', function(answer) {
+
+          socket.on('solve-question', function (answer) {
             $scope.$apply(function () {
               $scope.correctAnswerIndex = $scope.question.choices.indexOf(answer);
               if ($scope.selected.choice == answer && $scope.lockForm) {
@@ -219,7 +244,8 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
               $scope.lockForm = true;
             });
           });
-          $scope.selected = {choice: null};
+
+          $scope.selected = { choice: null };
           $scope.answer = function (selected) {
             $scope.success = undefined;
             $scope.error = undefined;
@@ -236,26 +262,32 @@ app.controller('UserCtrl', ['$scope', '$http', 'UserAuth', function ($scope, $ht
               }
             });
           };
+
         });
       });
   });
+
   $scope.logout = function () {
     UserAuth.logout();
     UserAuth.redirect();
   };
+
 }]);
 
 app.factory('UserAuth', ['$http', '$window', '$location', '$timeout', '$q', function ($http, $window, $location, $timeout, $q) {
+
   var encode = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
       return String.fromCharCode('0x' + p1);
     }));
   };
+
   var decode = function (str) {
     return decodeURIComponent(Array.prototype.map.call(atob(str), function (c) {
       return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
   };
+
   return {
     state: {
       isAuthenticated: false,
