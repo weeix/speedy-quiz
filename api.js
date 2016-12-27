@@ -90,6 +90,22 @@ module.exports = function () {
     });
   });
 
+  api.get('/quiz', function (req, res) {
+    adminCheck(req, function (err) {
+      if (err) {
+        res.status(401).send(err.message);
+        return;
+      }
+      quiz.list(function (err, result) {
+        if (err) {
+          res.status(404).send(err.message);
+          return;
+        }
+        res.json(result);
+      })
+    });
+  });
+
   api.get('/quiz/:qzid', function (req, res) {
     adminCheck(req, function (err) {
       var unasked = false;

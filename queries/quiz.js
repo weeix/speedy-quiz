@@ -2,7 +2,7 @@ var sqlite3 = require('sqlite3');
 var db = new sqlite3.Database('storage.db');
 
 module.exports.list = (callback) => {
-  db.all("SELECT qzid, gid, cid FROM quizzes", (err, rows) => {
+  db.all("SELECT q.qzid, q.gid, q.cid, g.displayName, c.collectionName FROM quizzes q LEFT JOIN groups g ON q.gid = g.gid LEFT JOIN collections c ON q.cid = c.cid", (err, rows) => {
     if (err) {
       callback(err, null);
       return;
